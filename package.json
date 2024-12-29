@@ -1,0 +1,26 @@
+{
+  "name": "justshipit",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "tw": "npx tailwindcss -i ./public/css/style.css -o ./public/css/output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "autoprefixer": "^10.4.20",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "mongoose": "^8.9.2",
+    "multer": "^1.4.5-lts.1",
+    "postcss": "^8.4.49"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

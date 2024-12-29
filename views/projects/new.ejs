@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Just Ship It | Add New Project</title>
+    <link href="/css/output.css" rel="stylesheet">
+
+    <script>
+        function validateForm(event) {
+          const liveUrl = document.getElementById("liveUrl").value.trim();
+          const githubUrl = document.getElementById("githubUrl").value.trim();
+    
+          if (!liveUrl && !githubUrl) {
+            alert("Please provide at least one URL: Live URL or GitHub URL.");
+            event.preventDefault(); // Prevent the form from being submitted
+          }
+        }
+      </script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-2xl mx-auto p-6">
+        <h1 class="text-2xl font-bold text-center color: black mb-8">Add New Project</h1>
+        
+        <form action="/projects" method="POST" class="space-y-6 bg-white p-6 rounded-lg shadow-md">
+            <div class="space-y-2">
+                <label for="title" class="block text-sm font-medium text-gray-700">
+                    Project Title
+                </label>
+                <input 
+                    type="text"
+                    id="title"
+                    name="title" 
+                    required
+                    minlength="3"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter project title"
+                >
+            </div>
+
+            <div class="space-y-2">
+                <label for="description" class="block text-sm font-medium text-gray-700">
+                    Description
+                </label>
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                    required
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe your project"
+                ></textarea>
+            </div>
+
+            <!-- Add this after the description textarea -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">
+                    Category
+                </label>
+                <div class="grid grid-cols-2 gap-2">
+                    <% ['Web App', 'Mobile App', 'Browser Extension', 'API/Backend', 'Developer Tool',
+                        'Open Source Library', 'Portfolio', 'E-commerce', 'Educational', 'Game', 'Just for Fun'].forEach(category => { %>
+                        <label class="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50">
+                            <input 
+                                type="radio"
+                                name="category"
+                                value="<%= category %>"
+                                required
+                                class="text-blue-600"
+                            >
+                            <span class="text-sm"><%= category %></span>
+                        </label>
+                    <% }) %>
+                </div>
+
+            <form action="/submit" method="POST" onsubmit="validateForm(event)">
+
+            <div class="space-y-4">
+                <label for="liveUrl" class="block text-sm font-mendium text-gray-700">
+                    Please enter your project URL or Github URL</label>
+                    <input 
+                    type="url"
+                    id="liveUrl"
+                    name="liveUrl" 
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter project URL"
+                >
+                    <input 
+                    type="url"
+                    id="githubUrl"
+                    name="githubUrl" 
+                    required
+                    minlength="3"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter Github URL"
+                >
+            </div>
+
+            
+        </form>
+    </div>
+</body>
+</html>
