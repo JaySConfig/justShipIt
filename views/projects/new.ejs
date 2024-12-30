@@ -197,13 +197,16 @@
     <div class="max-w-2xl mx-auto p-6">
         <h1 class="text-2xl font-bold text-center color: black mb-8">Add New Project</h1>
 
-        <!-- Add this right after the h1 title -->
+        <!-- submission message  -->
+        
         <div id="formMessages" class="mb-6">
             <div id="successMessage" class="hidden p-4 mb-4 bg-green-50 text-green-700 rounded-md">
                 Project submitted successfully!
             </div>
             <div id="errorMessage" class="hidden p-4 mb-4 bg-red-50 text-red-700 rounded-md"></div>
         </div>
+
+        <!-- title -->
         
         <form action="/projects" method="POST" class="space-y-6 bg-white p-6 rounded-lg shadow-md">
             <div class="space-y-2">
@@ -221,6 +224,8 @@
                 >
             </div>
 
+            <!-- description -->
+
             <div class="space-y-2">
                 <label for="description" class="block text-sm font-medium text-gray-700">
                     Description
@@ -234,6 +239,8 @@
                     placeholder="Describe your project"
                 ></textarea>
             </div>
+
+            <!-- category section -->
 
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">
@@ -253,6 +260,101 @@
                             <span class="text-sm"><%= category %></span>
                         </label>
                     <% }) %>
+                </div>
+            </div>
+
+            <%# tech stack #%>
+
+            <div class="space-y-4">
+            <label class="block text-sm font-medium text-gray-700">
+                Tech Stack
+            </label>
+            
+            <%# Frontend %>
+            <div class="space-y-2">
+                <h3 class="text-sm font-medium text-gray-600 text-align: text-center">Frontend</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <% ['JavaScript', 'React', 'Vue', 'Angular', 'Next.js', 'TypeScript', 'Tailwind', 'Bootstrap'].forEach(tech => { %>
+                        <label class="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50">
+                            <input 
+                                type="checkbox"
+                                name="techStack.frontend" 
+                                value="<%= tech %>"
+                                class="text-blue-600"
+                            >
+                            <span class="text-sm"><%= tech %></span>
+                        </label>
+                    <% }) %>
+                </div>
+            </div>
+
+            <%# Backend %>
+            <div class="space-y-2">
+                <h3 class="text-sm font-medium text-gray-600 text-align: text-center">Backend</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <% ['Node.js', 'Express', 'Python', 'Django', 'PHP', 'Laravel', 'Java'].forEach(tech => { %>
+                        <label class="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50">
+                            <input 
+                                type="checkbox"
+                                name="techStack.backend" 
+                                value="<%= tech %>"
+                                class="text-blue-600"
+                            >
+                            <span class="text-sm"><%= tech %></span>
+                        </label>
+                    <% }) %>
+                </div>
+            </div>
+
+            <%# Database %>
+            <div class="space-y-2">
+                <h3 class="text-sm font-medium text-gray-600 text-align: text-center">Database</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <% ['MongoDB', 'PostgreSQL', 'MySQL', 'Redis'].forEach(tech => { %>
+                        <label class="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50">
+                            <input 
+                                type="checkbox"
+                                name="techStack.database" 
+                                value="<%= tech %>"
+                                class="text-blue-600"
+                            >
+                            <span class="text-sm"><%= tech %></span>
+                        </label>
+                    <% }) %>
+                </div>
+            </div>
+
+            <%# Deployment %>
+            <div class="space-y-2">
+                <h3 class="text-sm font-medium text-gray-600 text-align: text-center">Deployment</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <% ['AWS', 'Vercel', 'Heroku', 'Docker', 'Netlify'].forEach(tech => { %>
+                        <label class="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50">
+                            <input 
+                                type="checkbox"
+                                name="techStack.deployment" 
+                                value="<%= tech %>"
+                                class="text-blue-600"
+                            >
+                            <span class="text-sm"><%= tech %></span>
+                        </label>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+
+            <div class="space-y-2">
+                <h3 class="text-sm font-medium text-gray-600 text-align: text-center">Other</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50">
+                        <input 
+                            type="checkbox"
+                            name="techStack" 
+                            value="Other"
+                            class="text-blue-600"
+                        >
+                        <span class="text-sm">Other</span>
+                    </label>
                 </div>
             </div>
 
@@ -284,6 +386,7 @@
             </div>
 
             <div class="mt-6">
+                
                 <button 
                     type="submit"
                     class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -292,6 +395,12 @@
                 </button>
 
             </div>
+
+
+
+        </div>
+
+            
         </form>
     </div>
 </body>
