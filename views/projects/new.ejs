@@ -4,21 +4,206 @@
     <title>Just Ship It | Add New Project</title>
     <link href="/css/output.css" rel="stylesheet">
 
-    <script>
-        function validateForm(event) {
-          const liveUrl = document.getElementById("liveUrl").value.trim();
-          const githubUrl = document.getElementById("githubUrl").value.trim();
-    
-          if (!liveUrl && !githubUrl) {
-            alert("Please provide at least one URL: Live URL or GitHub URL.");
-            event.preventDefault(); // Prevent the form from being submitted
-          }
-        }
-      </script>
+        <script>
+            // Constants for validation
+            const URL_MAX_LENGTH = 2048;
+            const GITHUB_URL_PATTERN = /^https:\/\/github\.com\/[\w-]+\/[\w.-]+\/?$/;
+        
+            // Define all functions first, before any event listeners or other code
+            function sanitizeUrl(url) {
+                url = url.trim();
+                return url.replace(/[<>\"\']/g, '');
+            }
+        
+            function updateInputStatus(input, isValid, message = '') {
+                const inputElement = document.getElementById(input);
+                const iconElement = document.getElementById(`${input}Icon`);
+                
+                // Reset classes
+                inputElement.classList.remove('border-red-500', 'border-green-500');
+                iconElement.classList.remove('text-red-500', 'text-green-500', 'hidden');
+                
+                if (isValid) {
+                    inputElement.classList.add('border-green-500');
+                    iconElement.classList.add('text-green-500');
+                    iconElement.textContent = '✓';
+                } else if (message) { // Only show error if there's a message
+                    inputElement.classList.add('border-red-500');
+                    iconElement.classList.add('text-red-500');
+                    iconElement.textContent = '✗';
+                } else {
+                    iconElement.classList.add('hidden');
+                }
+            }
+        
+            function validateUrls() {
+                const liveUrl = document.getElementById("liveUrl").value.trim();
+                const githubUrl = document.getElementById("githubUrl").value.trim();
+                const errorDiv = document.getElementById("urlError");
+                
+                // Reset error message
+                errorDiv.classList.add("hidden");
+                
+                // Check if at least one URL is provided
+                if (!liveUrl && !githubUrl) {
+                    errorDiv.textContent = "Please provide at least one URL: Live URL or GitHub URL";
+                    errorDiv.classList.remove("hidden");
+                    updateInputStatus('liveUrl', false, 'error');
+                    updateInputStatus('githubUrl', false, 'error');
+                    return false;
+                }
+                
+                // Validate Live URL if provided
+                let liveUrlValid = true;
+                if (liveUrl) {
+                    if (liveUrl.length > URL_MAX_LENGTH) {
+                        errorDiv.textContent = "Live URL is too long";
+                        errorDiv.classList.remove("hidden");
+                        liveUrlValid = false;
+                    } else {
+                        try {
+                            const url = new URL(sanitizeUrl(liveUrl));
+                            if (url.protocol !== 'https:') {
+                                errorDiv.textContent = "Live URL must use HTTPS";
+                                errorDiv.classList.remove("hidden");
+                                liveUrlValid = false;
+                            }
+                        } catch (e) {
+                            errorDiv.textContent = "Please enter a valid Live URL";
+                            errorDiv.classList.remove("hidden");
+                            liveUrlValid = false;
+                        }
+                    }
+                    updateInputStatus('liveUrl', liveUrlValid, !liveUrlValid && liveUrl);
+                } else {
+                    updateInputStatus('liveUrl', false, '');
+                }
+                
+                // Validate GitHub URL if provided
+                let githubUrlValid = true;
+                if (githubUrl) {
+                    if (githubUrl.length > URL_MAX_LENGTH) {
+                        errorDiv.textContent = "GitHub URL is too long";
+                        errorDiv.classList.remove("hidden");
+                        githubUrlValid = false;
+                    } else {
+                        const sanitizedGithubUrl = sanitizeUrl(githubUrl);
+                        if (!GITHUB_URL_PATTERN.test(sanitizedGithubUrl)) {
+                            errorDiv.textContent = "Please enter a valid GitHub repository URL (https://github.com/username/repository)";
+                            errorDiv.classList.remove("hidden");
+                            githubUrlValid = false;
+                        }
+                    }
+                    updateInputStatus('githubUrl', githubUrlValid, !githubUrlValid && githubUrl);
+                } else {
+                    updateInputStatus('githubUrl', false, '');
+                }
+                
+                return (liveUrlValid && liveUrl) || (githubUrlValid && githubUrl);
+            }
+        
+            async function handleFormSubmit(event) {
+                event.preventDefault();
+                
+                const form = event.target;
+                const submitButton = form.querySelector('button[type="submit"]');
+                const successMessage = document.getElementById('successMessage');
+                const errorMessage = document.getElementById('errorMessage');
+                
+                // Hide any existing messages
+                successMessage.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                
+                // Validate URLs first
+                if (!validateUrls()) {
+                    return;
+                }
+                
+                // Disable submit button and show loading state
+                submitButton.disabled = true;
+                submitButton.innerHTML = 'Submitting...';
+                
+                try {
+                    // Create FormData object
+                    const formData = new FormData(form);
+                    
+                    // Convert FormData to JSON
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        data[key] = value;
+                    });
+                    
+                    const response = await fetch('/projects', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        // Try to get error message from response
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || 'Failed to submit project');
+                    }
+                    
+                    // Show success message
+                    successMessage.classList.remove('hidden');
+                    
+                    // Reset form
+                    form.reset();
+                    
+                    // Reset any validation states
+                    const urlInputs = form.querySelectorAll('input[type="url"]');
+                    urlInputs.forEach(input => {
+                        input.classList.remove('border-red-500', 'border-green-500');
+                        const icon = document.getElementById(`${input.id}Icon`);
+                        if (icon) icon.classList.add('hidden');
+                    });
+                    
+                } catch (error) {
+                    // Show error message
+                    errorMessage.textContent = error.message || 'Something went wrong. Please try again.';
+                    errorMessage.classList.remove('hidden');
+                    
+                } finally {
+                    // Re-enable submit button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Submit Project';
+                }
+            }
+        
+            // Add event listeners after all functions are defined
+            document.addEventListener('DOMContentLoaded', function() {
+                const liveUrlInput = document.getElementById("liveUrl");
+                const githubUrlInput = document.getElementById("githubUrl");
+                
+                let timeoutId;
+                function debounceValidation() {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(validateUrls, 300);
+                }
+                
+                liveUrlInput.addEventListener('input', debounceValidation);
+                githubUrlInput.addEventListener('input', debounceValidation);
+                
+                // Add form submit handler
+                const form = document.querySelector('form');
+                form.addEventListener('submit', handleFormSubmit);
+            });
+        </script>
 </head>
 <body class="bg-gray-100">
     <div class="max-w-2xl mx-auto p-6">
         <h1 class="text-2xl font-bold text-center color: black mb-8">Add New Project</h1>
+
+        <!-- Add this right after the h1 title -->
+        <div id="formMessages" class="mb-6">
+            <div id="successMessage" class="hidden p-4 mb-4 bg-green-50 text-green-700 rounded-md">
+                Project submitted successfully!
+            </div>
+            <div id="errorMessage" class="hidden p-4 mb-4 bg-red-50 text-red-700 rounded-md"></div>
+        </div>
         
         <form action="/projects" method="POST" class="space-y-6 bg-white p-6 rounded-lg shadow-md">
             <div class="space-y-2">
@@ -50,7 +235,6 @@
                 ></textarea>
             </div>
 
-            <!-- Add this after the description textarea -->
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">
                     Category
@@ -70,31 +254,44 @@
                         </label>
                     <% }) %>
                 </div>
-
-            <form action="/submit" method="POST" onsubmit="validateForm(event)">
-
-            <div class="space-y-4">
-                <label for="liveUrl" class="block text-sm font-mendium text-gray-700">
-                    Please enter your project URL or Github URL</label>
-                    <input 
-                    type="url"
-                    id="liveUrl"
-                    name="liveUrl" 
-                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter project URL"
-                >
-                    <input 
-                    type="url"
-                    id="githubUrl"
-                    name="githubUrl" 
-                    required
-                    minlength="3"
-                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter Github URL"
-                >
             </div>
 
-            
+            <div class="space-y-4">
+                <label for="liveUrl" class="block text-sm font-medium text-gray-700">
+                    Please enter your project URL or Github URL
+                </label>
+                <div class="relative">
+                    <input 
+                        type="url"
+                        id="liveUrl"
+                        name="liveUrl" 
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter project URL"
+                    >
+                    <span id="liveUrlIcon" class="absolute right-3 top-1/2 transform -translate-y-1/2 hidden"></span>
+                </div>
+                <div class="relative">
+                    <input 
+                        type="url"
+                        id="githubUrl"
+                        name="githubUrl" 
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter Github URL"
+                    >
+                    <span id="githubUrlIcon" class="absolute right-3 top-1/2 transform -translate-y-1/2 hidden"></span>
+                </div>
+                <div id="urlError" class="hidden text-red-500 text-sm mt-1"></div>
+            </div>
+
+            <div class="mt-6">
+                <button 
+                    type="submit"
+                    class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                    Submit Project
+                </button>
+
+            </div>
         </form>
     </div>
 </body>
